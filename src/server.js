@@ -8,7 +8,9 @@ const urlStruct = {
   '/style.css': htmlHandler.getCSS, 
   //'/getUsers': jsonHandler.getUsers,
   //'/updateUser': jsonHandler.updateUser,
-  //notFound: jsonHandler.notFound,
+  '/success': jsonHandler.success,
+  '/badRequest': jsonHandler.badRequest,
+   notFound: jsonHandler.notFound,
 };
 
 const onRequest = (request, response) => {
@@ -16,6 +18,9 @@ const onRequest = (request, response) => {
     const protocol = request.connection.encrypted ? 'https' : 'http';
     const parsedUrl = new URL(request.url, `${protocol}://${request.headers.host}`);
     
+    //gets query paramtery and parses them into a resuable object by field name
+    request.query = Object.fromEntries(parsedUrl.searchParams);
+
     //Route based on the path user had gone tp
     if(urlStruct[parsedUrl.pathname]){
         return urlStruct[parsedUrl.pathname](request, response);
