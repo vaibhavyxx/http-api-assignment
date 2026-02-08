@@ -36,17 +36,18 @@
     };
 
     const requestUpdate = async (userForm) => {
-       const page = userForm.querySelector('#page').value;
-       const type = userForm.querySelector('#type').value;
+       const page = document.querySelector('#page').value;
+       const type = document.querySelector('#type').value;
 
-       let response = await fetch(url, {
-        method,
+       let response = await fetch(page, {
+        method:'GET',
         headers: {
-          'Accept': `${type}`,
+          'Accept': 'application/json'
+          //'Accept': `${type}`,
         },
        });
 
-       handleResponses(response, method === 'get');
+       handleResponses(response, 'get');
     };
 
     const init = () => {
