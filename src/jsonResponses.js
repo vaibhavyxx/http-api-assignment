@@ -18,6 +18,16 @@ const respond = (request, response, status, object, isJSON) => {
     //console.log(content);
 };
 
+const unauthorized = (request, response) => {
+    const responseJSON = {
+        message: 'Missing loggedIn query parameter set to yes',
+    };
+    if(!request.unauthorized.valid || request.unauthorized.valid !== 'true'){
+        responseJSON.message = 'Missing loggedIn query parameter set to yes';
+    }
+    respond(request, response, 200, responseJSON, true);
+}
+
 //for a success status code
 const success = (request, response) => {
     const responseJSON = {
