@@ -1,5 +1,5 @@
 const fs = require('fs'); //pull into file system module
-const { request } = require('http');
+//const { request } = require('http');
 
 //load files into memory sychronously to do it at the start
 const index = fs.readFileSync(`${__dirname}/../client/client.html`);
