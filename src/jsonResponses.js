@@ -82,7 +82,7 @@ const badRequest = (request, response) => {
       let responseXML = `<response><message> ${dataParam.message}</message><id>${dataParam.id}</id></response>`;
       return respond(request, response, 200, responseXML, 'text/xml');
     }else{
-      const dataJSON = JSON.stringify(data);
+      const dataJSON = JSON.stringify(dataParam);
       return respond(request, response, 200, dataJSON, 'application/json');
     }
 }

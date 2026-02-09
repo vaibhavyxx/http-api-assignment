@@ -15,7 +15,11 @@
   "type": "commonjs",
   "main": "./src/server.js",
   "scripts": {
+    "pretest": "eslint ./src --fix",
     "start": "node ./src/server.js",
-    "test": "echo \"No Tests\""
+    "test": "eslint ./src --fix"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.2"
   }
 }
