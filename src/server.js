@@ -6,10 +6,12 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 const urlStruct = {
   '/': htmlHandler.getIndex,
   '/style.css': htmlHandler.getCSS, 
-  //'/getUsers': jsonHandler.getUsers,
-  //'/updateUser': jsonHandler.updateUser,
   '/success': jsonHandler.success,
   '/badRequest': jsonHandler.badRequest,
+  '/internal': jsonHandler.internalRequest,
+  '/unauthorized':jsonHandler.unauthRequest,
+  '/notImplemented':jsonHandler.notImplementedReq,
+  '/forbidden':jsonHandler.forbiddenRequest,
    notFound: jsonHandler.notFound,
 };
 
