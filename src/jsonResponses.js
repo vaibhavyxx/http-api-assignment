@@ -50,15 +50,14 @@ const internalRequest = (request, response) => {
 }
 
 const notImplementedReq = (request, response) => {
-  jsonXMLData(request, response, 501, "A get reuqest for this page has not been implemented yet. Check again later for updated content.", 'notImplemented');
+  jsonXMLData(request, response, 501, "A get request for this page has not been implemented yet. Check again later for updated content.", 'notImplemented');
 }
 
 const badRequest = (request, response) => {
   if (!request.query.valid || request.query.valid !== 'true') {
-    jsonXMLData(request, response, 400, 'The page you are looking for was not found');
-  }
-  else{
-  jsonXMLData(request, response, 200, 'This request had the required parameters');
+    jsonXMLData(request, response, 400, 'The page you are looking for was not found', 'badRequest');
+  } else{
+  jsonXMLData(request, response, 200, 'This request had the required parameters', 'badRequest');
   }
 }
 module.exports = {success, badRequest, notFound, notImplementedReq, unauthRequest, forbiddenRequest, internalRequest};
