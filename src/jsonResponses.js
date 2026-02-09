@@ -1,67 +1,89 @@
-const { request } = require("http");
-
-//sends a json
-const respond = (request, response, status, object, isJSON) => {
-    let content;
-    if (isJSON) {
-        content = JSON.stringify(object);
-    } else {
-        content = object; // already a string (XML, text, etc.)
-    }
-    const headers = {
-    'Content-Type': isJSON ? 'application/json' : 'text/xml',
+const respond = (request, response, status, content, type) => {
+  response.writeHead(status, {
+    'Content-Type' : type,
     'Content-Length': Buffer.byteLength(content, 'utf8'),
-    };
-    response.writeHead(status, headers);
-    response.write(content);
-    response.end();
-    //console.log(content);
+  });
+  response.write(content);
+  response.end();
 };
 
-const unauthorized = (request, response) => {
-    const responseJSON = {
-        message: 'Missing loggedIn query parameter set to yes',
-    };
-    if(!request.unauthorized.valid || request.unauthorized.valid !== 'true'){
-        responseJSON.message = 'Missing loggedIn query parameter set to yes';
-    }
-    respond(request, response, 200, responseJSON, true);
+const jsonXMLData = (request, response, status, msg, id) => {
+  const accept = request.headers.accept || 'application/json';
+
+  const data = {
+    message: msg,
+    id:id,
+  }
+  if(accept.includes('text/xml')){
+    let responseXML = `<response><message> ${data.message}</message><id>${data.id}</id></response>`;
+    return respond(request, response, status, responseXML, 'text/xml');
+  }
+  else{
+    const dataJSON = JSON.stringify(data);
+    return respond(request, response, status, dataJSON, 'application/json');
+  }
 }
 
-//for a success status code
 const success = (request, response) => {
-    const responseJSON = {
-        message: 'This is a successful response',
-    };
-    respond(request, response, 200, responseJSON, true);
-};
-
-const responseXML= (request, response, responseJSON) => {
-    if(request.acceptedTypes[0] === 'text/xml'){
-        let responseXML = `<response>${responseJSON.message}</response>`
-        return respond(request, response, 200, responseXML, false);
-    }
-}
-
-const badRequest = (request, response) => {
-    const responseJSON = {
-        message: 'This request had the required parameters',
-    };
-
-    if(!request.query.valid || request.query.valid !== 'true'){
-        responseJSON.message = 'Missing valid query parameters';
-        responseJSON.id = 'badRequest';
-        return respond(request, response, 400, responseJSON, true);
-    }
-    return respond(request, response, 200, responseJSON, true);
+  jsonXMLData(request, response, 200, 'This is a successful response', 'success');
 };
 
 const notFound = (request, response) => {
-    const responseJSON = {
-        message: 'The page you are looking for was not found',
-        id: 'notFound',
-    };
-    respond(request, response, 404,responseJSON, true);
+  jsonXMLData(request, response, 404, 'The page you are looking for was not found', 'notFound');
 }
 
-module.exports = {success, badRequest, notFound,};
+const unauthRequest = (request, response) => {
+  if (!request.query.valid || request.query.valid !== 'true') {
+    jsonXMLData(request, response, 401, 'Missing loggedIn query param set to yes', 'unauthorized');
+  }
+  else{
+  jsonXMLData(request, response, 200, 'LoggedIn query parm set to yes', 'authorized');
+  }
+}
+
+const forbiddenRequest = (request, response) => {
+  jsonXMLData(request, response, 403, "Mssing loggedIn query param set to yes", 'forbidden');
+}
+
+const internalRequest = (request, response) => {
+  jsonXMLData(request, response, 500, "Internal Server Error. Something Went Wrong", 'internalServerError');
+}
+
+const notImplementedReq = (request, response) => {
+  jsonXMLData(request, response, 501, "A get reuqest for this page has not been implemented yet. Check again later for updated content.", 'notImplemented');
+}
+
+const badRequest = (request, response) => {
+  const accept = request.headers.accept || 'application/json';
+
+  if (!request.query.valid || request.query.valid !== 'true') {
+    //jsonXMLData(request, response, 400, 'The page you are looking for was not found');
+    const data ={
+      message: 'The page you are looking for was not found',
+      id: 'badRequest'
+    }
+
+    if(accept.includes('text/xml')){
+      let responseXML = `<response><message> ${data.message}</message><id>${data.id}</id></response>`;
+      return respond(request, response, 400, responseXML, 'text/xml');
+    }
+    else{
+      const dataJSON = JSON.stringify(data);
+      return respond(request, response, 400, dataJSON, 'application/json');
+    }
+  }
+
+  jsonXMLData(request, response, 200, 'This request had the required parameters');
+  const dataParam ={
+      message: 'This request had the required parameters',
+      id: 'badRequest',
+    }
+    if(accept.includes('text/xml')){
+      let responseXML = `<response><message> ${dataParam.message}</message><id>${dataParam.id}</id></response>`;
+      return respond(request, response, 200, responseXML, 'text/xml');
+    }else{
+      const dataJSON = JSON.stringify(data);
+      return respond(request, response, 200, dataJSON, 'application/json');
+    }
+}
+module.exports = {success, badRequest, notFound, notImplementedReq, unauthRequest, forbiddenRequest, internalRequest};

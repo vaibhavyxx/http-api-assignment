@@ -39,11 +39,18 @@
       }
 
       if(parseResponse){
-        let obj = await response.json();
-        let jsonString = JSON.stringify(obj);
-        content.innerHTML += `<p>${jsonString}</p>`;
-      }else{
-        content.innerHTML += ``;
+        const contentType = response.headers.get('content-type');
+
+        if(contentType.includes('application/json')){
+          const obj = await response.json();
+          content.innerHTML += `<pre>${JSON.stringify(obj, null, 2)}</pre>`;
+        }
+        else if(contentType.includes('text/xml')){
+          const text = await response.text();
+          const pre = document.createElement('pre');
+          pre.textContent = text;
+          content.appendChild(pre);
+        } 
       }
     };
 
@@ -54,12 +61,17 @@
        let response = await fetch(page, {
         method:'GET',
         headers: {
-          'Accept': 'application/json'
+          'Accept': type,
         },
        });
 
        handleResponses(response, 'get');
     };
+
+    const sendFetchRequest = (url, acceptedType) => {
+      const page = document.querySelector('#page').value;
+      const type = document.querySelector('#type').value;
+    }
 
     const init = () => {
       const userForm = document.querySelector('#send');
