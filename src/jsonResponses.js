@@ -1,60 +1,79 @@
-//sends a json
-const getResponseType = (response) => {
-  const accept = response.headers.get('accept');
-
-  if (accept && accept.includes('text/xml')) {
-    return 'xml';
-  }
-
-  return 'json'; // default
-};
-
-const respond = (request, response, status, content) => {
-    const headers = {
-    'Content-Type': 'application/json',
+const respond = (request, response, status, content, type) => {
+  response.writeHead(status, {
+    'Content-Type' : type,
     'Content-Length': Buffer.byteLength(content, 'utf8'),
-    };
-    response.writeHead(status, headers);
-    response.write(content);
-    response.end();
+  });
+  response.write(content);
+  response.end();
 };
 
-//helper function for writing messages
-function respondMessage(msg, response) {
-    //const type = getResponseType(response);
-    /*if (type === 'xml') {
-        return `<response><message>${msg}</message></response>`;
-    }*/
-    return JSON.stringify({ message: msg });
-}
-
-//for a success status code
 const success = (request, response) => {
-    //const type = getResponseType(response);
-    const body = respondMessage('This is a successful response', request);
+  const accept = request.headers.accept || 'application/json';
 
-    respond(request, response, 200, body);
-    //respond(request, response, 200, respondMessage('This is a successful response', response));
-};
-
-const badRequest = (request, response) => {
-    //const type = getResponseType(response);
-
-  if (!request.query.valid || request.query.valid !== 'true') {
-    const body = respondMessage('Missing valid query parameters', request);
-    return respond(request, response, 400, body);
+  const data = {
+    message: 'This is a successful response'
   }
-
-  const body = respondMessage('This request had the required parameters', request);
-  return respond(request, response, 200, body);
-//return respond(request, response, 200, res);
+  if(accept.includes('text/xml')){
+    let responseXML = `<response>`
+      responseXML += data.message;
+      responseXML += `</response>`;
+    return respond(request, response, 200, responseXML, 'text/xml');
+  }
+  else{
+    const dataJSON = JSON.stringify(data);
+    return respond(request, response, 200, dataJSON, 'application/json');
+  }
 };
 
 const notFound = (request, response) => {
-    //const type = getResponseType(response);
-    const body = respondMessage('The page you are looking for was not found', request);
+  const accept = request.headers.accept || 'application/json';
 
-    respond(request, response, 404, body);
+  const data ={
+    message: 'The page you are looking for was not found',
+  }
+  if(accept.includes('text/xml')){
+    let responseXML = `<response>`
+      responseXML += data.message;
+      responseXML += `</response>`;
+    return respond(request, response, 404, responseXML, 'text/xml');
+  }
+  else{
+    const dataJSON = JSON.stringify(data);
+    return respond(request, response, 404, dataJSON, 'application/json');
+  }
 }
 
+const badRequest = (request, response) => {
+  const accept = request.headers.accept || 'application/json';
+
+  if (!request.query.valid || request.query.valid !== 'true') {
+    const data ={
+      message: 'The page you are looking for was not found',
+    }
+
+    if(accept.includes('text/xml')){
+      let responseXML = `<response>`
+      responseXML += data.message;
+      responseXML += `</response>`;
+      return respond(request, response, 400, responseXML, 'text/xml');
+    }
+    else{
+      const dataJSON = JSON.stringify(data);
+      return respond(request, response, 400, dataJSON, 'application/json');
+    }
+  }
+
+  const dataParam ={
+      message: 'This request had the required parameters',
+    }
+    if(accept.includes('text/xml')){
+      let responseXML = `<response>`
+      responseXML += data.message;
+      responseXML += `</response>`;
+      return respond(request, response, 200, responseXML, 'text/xml');
+    }else{
+      const dataJSON = JSON.stringify(data);
+      return respond(request, response, 200, dataJSON, 'application/json');
+    }
+}
 module.exports = {success, badRequest, notFound,};
