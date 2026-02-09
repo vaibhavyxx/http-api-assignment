@@ -47,7 +47,9 @@
         }
         else if(contentType.includes('text/xml')){
           const text = await response.text();
-          content.innerHTML += `<pre>${text}</pre>`;
+          const pre = document.createElement('pre');
+          pre.textContent = text;
+          content.appendChild(pre);
         } 
       }
     };
