@@ -54,36 +54,11 @@ const notImplementedReq = (request, response) => {
 }
 
 const badRequest = (request, response) => {
-  const accept = request.headers.accept || 'application/json';
-
   if (!request.query.valid || request.query.valid !== 'true') {
-    //jsonXMLData(request, response, 400, 'The page you are looking for was not found');
-    const data ={
-      message: 'The page you are looking for was not found',
-      id: 'badRequest'
-    }
-
-    if(accept.includes('text/xml')){
-      let responseXML = `<response><message> ${data.message}</message><id>${data.id}</id></response>`;
-      return respond(request, response, 400, responseXML, 'text/xml');
-    }
-    else{
-      const dataJSON = JSON.stringify(data);
-      return respond(request, response, 400, dataJSON, 'application/json');
-    }
+    jsonXMLData(request, response, 400, 'The page you are looking for was not found');
   }
-
+  else{
   jsonXMLData(request, response, 200, 'This request had the required parameters');
-  const dataParam ={
-      message: 'This request had the required parameters',
-      id: 'badRequest',
-    }
-    if(accept.includes('text/xml')){
-      let responseXML = `<response><message> ${dataParam.message}</message><id>${dataParam.id}</id></response>`;
-      return respond(request, response, 200, responseXML, 'text/xml');
-    }else{
-      const dataJSON = JSON.stringify(dataParam);
-      return respond(request, response, 200, dataJSON, 'application/json');
-    }
+  }
 }
 module.exports = {success, badRequest, notFound, notImplementedReq, unauthRequest, forbiddenRequest, internalRequest};
